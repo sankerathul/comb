@@ -92,5 +92,58 @@ def remove_key(
         raise typer.Exit(1)
 
 
+# ------------------------------------------------------------------ #
+# comb run
+# ------------------------------------------------------------------ #
+
+@app.command("run")
+def run_goal(
+    goal: str = typer.Argument(..., help="Natural language goal for the agent swarm"),
+):
+    """Plan and execute a multi-agent swarm for a given goal."""
+    from comb.agents import plan, run
+
+    console.print("[bold]Planning agents...[/bold]")
+    try:
+        agent_plan = plan(goal)
+    except RuntimeError as e:
+        rprint(f"[red]✗[/red] {e}")
+        raise typer.Exit(1)
+
+    rprint(f"[green]✓[/green] Plan: [bold]{len(agent_plan.agents)} agents[/bold]")
+    for agent in agent_plan.agents:
+        console.print(f"  [dim]·[/dim] {agent.role}  ({agent.provider} / {agent.model})")
+
+    console.print("\n[bold]Running agents in parallel...[/bold]")
+    results = run(agent_plan)
+    results.sort(key=lambda r: r.role)
+
+    console.print()
+    for result in results:
+        console.rule(f"[bold]{result.role}[/bold]  [dim]{result.provider}/{result.model}[/dim]")
+        if result.error:
+            rprint(f"[red]Error:[/red] {result.error}")
+        else:
+            console.print(result.output)
+        console.print()
+
+
+
+
+# ------------------------------------------------------------------ #
+# comb serve
+# ------------------------------------------------------------------ #
+
+@app.command("serve")
+def serve(
+    host: str = typer.Option("localhost", help="Host to bind to"),
+    port: int = typer.Option(8000, help="Port to listen on"),
+):
+    """Start the COMB web UI server."""
+    import uvicorn
+    rprint(f"[green]✓[/green] COMB server running at [bold]http://{host}:{port}[/bold]")
+    uvicorn.run("comb.api.server:app", host=host, port=port, reload=False)
+
+
 def main():
     app()
