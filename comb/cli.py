@@ -129,5 +129,21 @@ def run_goal(
 
 
 
+
+# ------------------------------------------------------------------ #
+# comb serve
+# ------------------------------------------------------------------ #
+
+@app.command("serve")
+def serve(
+    host: str = typer.Option("localhost", help="Host to bind to"),
+    port: int = typer.Option(8000, help="Port to listen on"),
+):
+    """Start the COMB web UI server."""
+    import uvicorn
+    rprint(f"[green]✓[/green] COMB server running at [bold]http://{host}:{port}[/bold]")
+    uvicorn.run("comb.api.server:app", host=host, port=port, reload=False)
+
+
 def main():
     app()
