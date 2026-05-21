@@ -31,6 +31,16 @@ class Settings(BaseSettings):
         alias="COMB_VAULT_ENV_FILE"
     )
 
+    # Queen agent model configuration
+    queen_provider: str = Field(
+        default="anthropic",
+        alias="COMB_QUEEN_PROVIDER"
+    )
+    queen_model: str = Field(
+        default="claude-opus-4-7",
+        alias="COMB_QUEEN_MODEL"
+    )
+
     model_config = {"populate_by_name": True}
 
 
